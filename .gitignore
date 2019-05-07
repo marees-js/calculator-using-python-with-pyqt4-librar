@@ -1,104 +1,135 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
 
-# C extensions
-*.so
+
+
+
+
+
+
 
 # Distribution / packaging
 .Python
 build/
 develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+from PyQt4.QtCore import pyqtSignature
+from PyQt4.QtGui import QDialog
+from PyQt4 import QtGui,QtCore
+import sys
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+from cal import Ui_Dialog
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+class Dig_calculator(QDialog,Ui_Dialog):
+    
+    lcdstring=''
+   
+    operation=''
+   
+    currentNum=0
+   
+    previousNum=0
+    
+    result=0
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
+    def __init__(self,parent=None):
+        QDialog.__init__(self,parent)
+        self.setupUi(self)
+        self.action()
+    
+    def action(self):
+        
+        self.connect(self.b0, QtCore.SIGNAL('clicked()'),self.buttonClicked)
+        self.connect(self.b1, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b2, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b3, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b4, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b5, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b6, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b7, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b8, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b9, QtCore.SIGNAL('clicked()'), self.buttonClicked)
+        self.connect(self.b_pont, QtCore.SIGNAL('clicked()'), self.buttonClicked)
 
-# Translations
-*.mo
-*.pot
+        
+        self.connect(self.b_plus,QtCore.SIGNAL('clicked()'),self.opClicked)
+        self.connect(self.b_sub,QtCore.SIGNAL('clicked()'),self.opClicked)
+        self.connect(self.b_mul,QtCore.SIGNAL('clicked()'),self.opClicked)
+        self.connect(self.b_div,QtCore.SIGNAL('clicked()'),self.opClicked)
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
+       
+        self.connect(self.b_clear, QtCore.SIGNAL('clicked()'), self.clrClicked)
 
-# Flask stuff:
-instance/
-.webassets-cache
+       
+        self.connect(self.b_eq, QtCore.SIGNAL('clicked()'), self.eqClicked)
 
-# Scrapy stuff:
-.scrapy
+    def buttonClicked(self):
+        if len(Dig_calculator.lcdstring) <= 7 :
+            Dig_calculator.lcdstring = Dig_calculator.lcdstring + self.sender().text()
+            if Dig_calculator.lcdstring == '.':
+                Dig_calculator.lcdstring = '0.'
+            else:
 
-# Sphinx documentation
-docs/_build/
+                if str(Dig_calculator.lcdstring).count('.') > 1:
+                    Dig_calculator.lcdstring = str(Dig_calculator.lcdstring)[:-1]
+                if str(Dig_calculator.lcdstring).count('.') == 0 and str(Dig_calculator.lcdstring)[0] == '0':
+                    Dig_calculator.lcdstring = str(Dig_calculator.lcdstring)[:-1]
+                else:
+                    self.lcd.display(Dig_calculator.lcdstring)
+                    Dig_calculator.currentNum = float(Dig_calculator.lcdstring)
+        else:
+            pass
 
-# PyBuilder
-target/
+    def opClicked(self):
+        Dig_calculator.previousNum = Dig_calculator.currentNum
+        Dig_calculator.currentNum = 0
+        Dig_calculator.lcdstring = ''
+        Dig_calculator.operation = self.sender().objectName()
 
-# Jupyter Notebook
-.ipynb_checkpoints
+    def clrClicked(self):
+        Dig_calculator.lcdstring = ''
+        Dig_calculator.operation = ''
+        Dig_calculator.currentNum = 0
+        Dig_calculator.previousNum = 0
+        Dig_calculator.result = 0
+        self.lcd.display(0)
 
-# pyenv
-.python-version
+    def eqClicked(self):
+        if Dig_calculator.operation == 'b_plus':
+            Dig_calculator.result = Dig_calculator.previousNum + Dig_calculator.currentNum
+            self.lcd.display(Dig_calculator.result)
+        if Dig_calculator.operation == 'b_sub':
+            Dig_calculator.result = Dig_calculator.previousNum - Dig_calculator.currentNum
+            self.lcd.display(Dig_calculator.result)
+        if Dig_calculator.operation == 'b_mul':
+            Dig_calculator.result = Dig_calculator.previousNum * Dig_calculator.currentNum
+            self.lcd.display(Dig_calculator.result)
+        if Dig_calculator.operation == 'b_div':
+            if Dig_calculator.currentNum == 0:
+                self.lcd.display('error')
+                Dig_calculator.result = 0
+                Dig_calculator.previousNum = 0
 
-# celery beat schedule file
-celerybeat-schedule
+            else:
+                Dig_calculator.result = Dig_calculator.previousNum / Dig_calculator.currentNum
+                self.lcd.display(Dig_calculator.result)
 
-# SageMath parsed files
-*.sage.py
+        Dig_calculator.currentNum = Dig_calculator.result
+        Dig_calculator.lcdstring = ''
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+    def closeEvent(self, QCloseEvent):
+        reply = QtGui.QMessageBox.question(self',u',QtGui.QMessageBox.Yes,QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            QCloseEvent.accept()
+        else:
+            QCloseEvent.ignore()
 
-# Spyder project settings
-.spyderproject
-.spyproject
 
-# Rope project settings
-.ropeproject
+if __name__=='__main__':
+    app = QtGui.QApplication(sys.argv)
+    mycal = Dig_calculator()
+    mycal.show()
+    sys.exit(app.exec_())
 
-# mkdocs documentation
-/site
 
-# mypy
-.mypy_cache/
+
+
+
+
